@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head sticky-top>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <title>Picture Browser</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
+    <!-- Latest compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <nav class="navbar navbar-inverse sticky-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Photo Explorer</a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li>
+              <button id="toggleButton" class="leftToggle" onclick="openNav()">
+                Show Selected
+              </button>
+            </li>
+            <li>
+              <div class="dropdown">
+                <button class="dropbtn" onclick="">Folders</button>
+                <div id="topBarFolderList" class="dropdown-content">
+                  {% for dir in dirs %}
+                  <a href="#" onclick="folderSelect('{{ dir[1] }}');">
+                    {{ dir[1] }}
+                  </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </li>
+            <li>
+              <button id="newFolder" class="topBar" onclick="newFolderModal()">
+                New Folder
+                <!-- create a newFolder function that uses ajax. -->
+              </button>
+            </li>
+          </ul>
+      </nav>
+    </div>
+    <div class="flex-side">
+      <div class="nav"></div>
+
+      <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"></a>
+      </div>
+
+      <!-- Trigger the modal with a button. Make this dynamic with javascript to remove duplication. -->
+      <button
+        id="hiddenModel"
+        type="button"
+        class="btn btn-info btn-lg"
+        data-toggle="modal"
+        data-target="#myModal"
+        style="display: none;"
+      >
+        
+      </button>
+
+      <button
+      id="newFileModalButton"
+      type="button"
+      class="btn btn-info btn-lg"
+      data-toggle="modal"
+      data-target="#filePathModal"
+      style="display: none;"
+    >
+      
+    </button>
+
+    <button
+    id="bulkMoveModalButton"
+    type="button"
+    class="btn btn-info btn-lg"
+    data-toggle="modal"
+    data-target="#bulkMoveFiles"
+    style="display: none;"
+  >
+    
+  </button>
+
+      <!-- Modal Rename/Move picture -->
+      <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">
+                <!-- &times; -->
+              </button>
+              <form id="picInfoForm" name="picInfoForm">
+                <label for="modalPictureName">Picture Name:</label>
+                <input
+                  type="text"
+                  name="modalPictureName"
+                  id="modalPictureName"
+                  value=""
+                  required
+                /><br />
+                <label for="modalFilePath">Picture Folder:</label>
+                <select id="modalFilePath" name="modalFilePath" selected="">
+                  {% for dir in dirs %}
+                  <option value="{{ dir[1] }}">{{ dir[1] }}</option>
+                  {% endfor %}
+                </select>
+                <br /><input type="submit" value="Update Picture" />
+              </form>
+              <!-- <p id="modalFilePath">Some text in the modal.</p> -->
+            </div> 
+            <div class="modal-body">
+              <img
+                name="modalPhoto"
+                class="img-responsive"
+                src=""
+                id="mpid"
+                style="opacity: 1;"
+              />
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-default"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal New File Path picture -->
+      <div id="filePathModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">
+                <!-- &times; -->
+              </button>
+              <form id="newFilePath" name="newFilePath">
+                <label for="newFolder">New Folder:</label>
+                <input
+                  type="text"
+                  name="newFolder"
+                  id="newFolder"
+                  value=""
+                  required
+                /><br />
+                <label for="newFolderFilePath">Folder Path:</label>
+                <select id="newFolderFilePath" name="newFolderFilePath" selected="">
+                  {% for dir in dirs %}
+                  <option value="{{ dir[1] }}">{{ dir[1] }}</option>
+                  {% endfor %}
+                </select>
+                <br /><input type="submit" value="New Folder" />
+              </form>
+              <!-- <p id="modalFilePath">Some text in the modal.</p> -->
+            </div> 
+            <div class="modal-body">
+              Please enter an alpha-numeric file name with no special characters.
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-default"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Bulk Move Pictures -->
+      <div id="bulkMoveFiles" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">
+                <!-- &times; -->
+              </button>
+              <form id="BulkDestinationPath" name="newFilePath">
+
+                <label for="bulkDestinationPath">Move Selected Files to:</label>
+                <select id="bulkDestinationPath" name="bulkDestinationPath" selected="">
+                  {% for dir in dirs %}
+                  <option value="{{ dir[1] }}">{{ dir[1] }}</option>
+                  {% endfor %}
+                </select>
+                <br /><input type="submit" value="New Folder" />
+              </form>
+              <!-- <p id="modalFilePath">Some text in the modal.</p> -->
+            </div> 
+            <div class="modal-body">
+              Bulk move selected files to:
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-default"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pictureContainer">
+        {% for pic in pics %}
+        <div
+          class="pictureBox"
+          id="{{ pic[2] }}"
+          onclick="imgClick('{{ pic[0] }}');"
+        >
+          {% if pic[0] < 32 %}
+          <img
+            class="photo"
+            alt="{{ pic[2] }}"
+            src="{{ pic[1] }}"
+            id="{{ pic[0] }}"
+            style="opacity: 1;"
+          />
+          {% else %}
+          <img
+            class="lazy"
+            alt="{{ pic[2] }}"
+            src=""
+            data-src="{{ pic[1] }}"
+            id="{{ pic[0] }}"
+            style="opacity: 1;"
+          />
+
+          {% endif %}
+          <div class="overlay" id="c{{ pic[0] }}">
+            <img class="checkMark" src="/static/checkmark.png" />
+            <h1>{{ pic[0] }}</h1>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- end flex side -->
+  </body>
+  <script
+    type="text/javascript"
+    src="{{ url_for('static', filename='picture.js') }}"
+  ></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</html>
