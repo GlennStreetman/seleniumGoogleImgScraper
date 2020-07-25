@@ -30,7 +30,7 @@
       <nav class="navbar navbar-inverse sticky-top">
         <div class="container-fluid">
           <div class="navbar-header">
-            <a class="navbar-brand" href="#">Photo Explorer</a>
+            <a class="navbar-brand" href="#">Google Image Scrape</a>
           </div>
           <ul class="nav navbar-nav">
             <li>
@@ -51,8 +51,14 @@
               </div>
             </li>
             <li>
-              <button id="newFolder" class="topBar" onclick="newFolderModal()">
+              <button id="newFolder" class="topBar" onclick="showModal('filePathModal')">
                 New Folder
+                <!-- create a newFolder function that uses ajax. -->
+              </button>
+            </li>
+            <li>
+              <button id="scrapeGoogle" class="topBar" onclick="showModal('scrapeImageModal')">
+                Scrape Images
                 <!-- create a newFolder function that uses ajax. -->
               </button>
             </li>
@@ -68,40 +74,18 @@
 
       <!-- Trigger the modal with a button. Make this dynamic with javascript to remove duplication. -->
       <button
-        id="hiddenModel"
+        id="showModalButton"
         type="button"
         class="btn btn-info btn-lg"
         data-toggle="modal"
-        data-target="#myModal"
+        data-target=""
         style="display: none;"
       >
-        
+    <!-- #myModal -->
       </button>
 
-      <button
-      id="newFileModalButton"
-      type="button"
-      class="btn btn-info btn-lg"
-      data-toggle="modal"
-      data-target="#filePathModal"
-      style="display: none;"
-    >
-      
-    </button>
-
-    <button
-    id="bulkMoveModalButton"
-    type="button"
-    class="btn btn-info btn-lg"
-    data-toggle="modal"
-    data-target="#bulkMoveFiles"
-    style="display: none;"
-  >
-    
-  </button>
-
       <!-- Modal Rename/Move picture -->
-      <div id="myModal" class="modal fade" role="dialog">
+      <div id="renamePictureModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
           <!-- Modal content-->
           <div class="modal-content">
@@ -160,7 +144,7 @@
                 <!-- &times; -->
               </button>
               <form id="newFilePath" name="newFilePath">
-                <label for="newFolder">New Folder:</label>
+                <label for="newFolder">Create Folder:</label>
                 <input
                   type="text"
                   name="newFolder"
@@ -174,7 +158,7 @@
                   <option value="{{ dir[1] }}">{{ dir[1] }}</option>
                   {% endfor %}
                 </select>
-                <br /><input type="submit" value="New Folder" />
+                <br /><input type="submit" value="Create Folder" />
               </form>
               <!-- <p id="modalFilePath">Some text in the modal.</p> -->
             </div> 
@@ -203,7 +187,7 @@
               <button type="button" class="close" data-dismiss="modal">
                 <!-- &times; -->
               </button>
-              <form id="BulkDestinationPath" name="newFilePath">
+              <form id="BulkDestinationPath" name="BulkDestinationPath">
 
                 <label for="bulkDestinationPath">Move Selected Files to:</label>
                 <select id="bulkDestinationPath" name="bulkDestinationPath" selected="">
@@ -211,7 +195,7 @@
                   <option value="{{ dir[1] }}">{{ dir[1] }}</option>
                   {% endfor %}
                 </select>
-                <br /><input type="submit" value="New Folder" />
+                <br /><input type="submit" value="Move Files" />
               </form>
               <!-- <p id="modalFilePath">Some text in the modal.</p> -->
             </div> 
@@ -231,11 +215,66 @@
         </div>
       </div>
 
-      <div class="pictureContainer">
+           <!-- Scrape images from Google modal. -->
+           <div id="scrapeImageModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">
+                    <!-- &times; -->
+                  </button>
+                  <form id="scrapeImage" name="scrapeImage">
+                    <label for="imageDescription">Image Description</label>
+                      <input
+                        type="text"
+                        name="imageDescription"
+                        id="imageDescription"
+                        value=""
+                        required
+                      /><br />
+
+                      <label for="imageCount">Number of Images</label>
+                      <input
+                        type="number"
+                        name="imageCount"
+                        id="imageCount"
+                        value="10"
+                        required
+                      /><br />
+                    
+                    <label for="scrapeDestination">Save picutres to:</label>
+                    <select id="scrapeDestination" name="scrapeDestination" selected="">
+                      {% for dir in dirs %}
+                      <option value="{{ dir[1] }}">{{ dir[1] }}</option>
+                      {% endfor %}
+                    </select>
+                    <br /><input type="submit" value="Scrape Images" />
+                  </form>
+                  <!-- <p id="modalFilePath">Some text in the modal.</p> -->
+                </div> 
+                <div class="modal-body">
+                  Scrape specified number of images from Google image search.
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-default"
+                    data-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+      <div class="pictureContainer" id="pictureContainer">
+        <!-- [0]#, [1]FileName, [2]filepath -->
         {% for pic in pics %}
         <div
           class="pictureBox"
-          id="{{ pic[2] }}"
+          id="{{ pic[2] + pic[0]|string }}"
           onclick="imgClick('{{ pic[0] }}');"
         >
           {% if pic[0] < 32 %}

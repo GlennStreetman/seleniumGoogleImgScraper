@@ -22,6 +22,7 @@ from os import mkdir
 import shutil
 import json
 import requests
+from imageScrapeGoogle import scrape_Google_Images
 
 bp = Blueprint("pictures", __name__)
 
@@ -51,8 +52,7 @@ def find_directory() -> list:  # returns list of jpegs
             correcteddDirectory = unsorted_pics[i].replace(
                 "E:/Flask/pictureApp/pictureApp/static/", "")
             correcteddDirectory = correcteddDirectory.replace("\\", "/")
-            if correcteddDirectory[-1] != "/":
-                correcteddDirectory += "/"
+            correcteddDirectory += "/" if correcteddDirectory[-1] != "/" else ""
             directory_list.append([i, correcteddDirectory])
 
     return directory_list
@@ -176,9 +176,6 @@ def newFolder():
 
         mkdir(basePath + newFolderPath + newFolder)
         return jsonify(error="none", success="Directory Created: " + basePath + newFolderPath + newFolder)
-        # update directory listing on tpo bardrop down.
-        # update directory listing on model popup for picture name.
-        # return folder created message
 
 
 @ bp.route('/_bulk_Move', methods=("GET", "POST"))
@@ -199,3 +196,20 @@ def bulkMovePictures():
         print("Bulk Move Complete")
 
         return jsonify(log=moveLog)
+
+
+@ bp.route('/_scrape_Request', methods=("GET", "POST"))
+def scrape_Picture_Request():
+    if request.method == "POST":
+
+        jsonData = request.get_json()
+
+        searchTerm = jsonData['imageDescription']
+        scrapeCount = int(jsonData['imageCount'])
+        staticPath = "E:/Flask/pictureApp/pictureApp/static/"
+        saveTo = staticPath + jsonData['scrapeDestination']
+
+        print(searchTerm, scrapeCount, saveTo)
+        print('-----------')
+
+        return scrape_Google_Images(searchTerm, saveTo, scrapeCount)

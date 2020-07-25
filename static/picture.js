@@ -1,5 +1,6 @@
 let clickedImageList = {};
 let staticPath = "E:/Flask/pictureApp/pictureApp/static/pictures/";
+let visableFolder = "";
 
 function getFileName(indexRef) {
   imagePath = clickedImageList[indexRef];
@@ -39,18 +40,37 @@ function imgClick(myArg) {
   hideToggle();
 }
 
+//toggle sidebar
+function hideToggle() {
+  if (Object.keys(clickedImageList).length == 0) {
+    document.getElementById("toggleButton").style.display = "none";
+  } else {
+    document.getElementById("toggleButton").style.display = "block";
+  }
+}
+//adjust sidebar padding when sidebar toggled.
+function openNav() {
+  //Adjust the padding to make room for sidebar.
+  document.getElementById("mySidenav").style.width = "20%";
+  document.getElementsByClassName("pictureContainer")[0].style.paddingLeft =
+    "20%";
+  document.getElementsByClassName("pictureContainer")[0].style.paddingRight =
+    "0%";
+}
+
+//update sidebar with list of selected pictures.
 function updateNav() {
   document.getElementById("mySidenav").innerHTML = ""; //remove all inner html from sidebar
   document.getElementById("mySidenav").innerHTML += //remove all from nav bar
     "<button class='sideToggle' onclick='resetNav()'><i class='fa fa-close'></i></button>";
   document.getElementById("mySidenav").innerHTML += //show bulk move modal
-    "<button class='sideToggle' onclick='bulkMoveModal()'><i class='fa fa-folder-open'></i></button>";
+    "<button class='sideToggle' onclick=showModal('bulkMoveFiles')><i class='fa fa-folder-open'></i></button>";
   document.getElementById("mySidenav").innerHTML += //hide sidebar
     "<button class='sideToggle' onclick='closeNav()'><i class='fa fa-arrow-left'></i></button>";
   for (i = 0; i < Object.keys(clickedImageList).length; i++) {
     //add links for all selected images to sidebar
     var imagelistitem =
-      "<button class='sidePic' onclick='showModal(" +
+      "<button class='sidePic' onclick='updatePictureModal(" +
       Object.keys(clickedImageList)[i] +
       ")'>" +
       "[" +
@@ -62,23 +82,6 @@ function updateNav() {
   }
 }
 
-function hideToggle() {
-  if (Object.keys(clickedImageList).length == 0) {
-    document.getElementById("toggleButton").style.display = "none";
-  } else {
-    document.getElementById("toggleButton").style.display = "block";
-  }
-}
-
-function openNav() {
-  //Adjust the padding to make room for sidebar.
-  document.getElementById("mySidenav").style.width = "20%";
-  document.getElementsByClassName("pictureContainer")[0].style.paddingLeft =
-    "20%";
-  document.getElementsByClassName("pictureContainer")[0].style.paddingRight =
-    "0%";
-}
-
 /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
@@ -88,6 +91,7 @@ function closeNav() {
     "10%";
 }
 
+//refreshes sidebar content.
 function resetNav() {
   for (img in clickedImageList) {
     imgClick(img);
@@ -115,27 +119,26 @@ function addFolderDropdown(folderPath) {
     "</a>";
 }
 
-function showModal(pictureID) {
+//show picture rename modal.
+function updatePictureModal(pictureID) {
   document.getElementById("modalPictureName").value = getFileName(pictureID);
   document.getElementById("modalFilePath").selected = getFilePath(pictureID);
   photo = document.getElementsByClassName("img-responsive");
   photo[0].src = clickedImageList[pictureID];
-  photo[0].id = Object.keys(clickedImageList)[pictureID];
-  document.getElementById("hiddenModel").click();
-}
-
-function newFolderModal() {
-  document.getElementById("newFileModalButton").click();
-}
-
-function bulkMoveModal() {
-  document.getElementById("bulkMoveModalButton").click();
+  photo[0].id = "m" + pictureID;
+  showModal("renamePictureModal");
 }
 
 // When the user clicks on <span> (x), close the modal
 function hideModal() {
   modal = document.getElementById("pictureModal");
   modal.style.display = "none";
+}
+
+function showModal(modalName) {
+  target = document.getElementById("showModalButton");
+  target.dataset.target = "#" + modalName;
+  target.click();
 }
 
 // When the user clicks anywhere outside of the modal, close it
@@ -146,6 +149,7 @@ window.onclick = function (event) {
   }
 };
 
+// submit rename picture model. getelementbyid
 $("#picInfoForm").submit(function (event) {
   // get the form data
   var formData = {
@@ -172,7 +176,19 @@ $("#picInfoForm").submit(function (event) {
         alert(data["error"]);
       } else {
         alert(data["success"]);
-        document.getElementById("hiddenModel").click();
+        document.getElementById("renamePictureModal").click();
+        modalPhotoID = document.getElementsByName("modalPhoto")[0].id;
+        document.getElementById(modalPhotoID[1]).src =
+          "static/" +
+          formData["newPhotoSource"] +
+          formData["newPhotoName"] +
+          ".jpg"; //rename photo in photo pane.
+        clickedImageList[modalPhotoID[1]] =
+          "static/" +
+          formData["newPhotoSource"] +
+          formData["newPhotoName"] +
+          ".jpg";
+        updateNav();
       }
 
       // here we will handle errors and validation messages
@@ -182,6 +198,7 @@ $("#picInfoForm").submit(function (event) {
   event.preventDefault();
 });
 
+//create new folder path.
 $("#filePathModal").submit(function (event) {
   // get the form data
   var formData = {
@@ -205,13 +222,13 @@ $("#filePathModal").submit(function (event) {
   })
     // using the done promise callback
     .done(function (data) {
-      // log data to the console so we can see
       console.log(data);
       if (data["error"] != "none") {
         alert(data["error"]);
       } else {
         alert(data["success"]);
-        document.getElementById("newFileModalButton").click();
+        showModal("filePathModal");
+        //document.getElementById("filePathModal").click();
         addFolderDropdown(updateDropdown);
       }
 
@@ -222,6 +239,7 @@ $("#filePathModal").submit(function (event) {
   event.preventDefault();
 });
 
+//bulk move all files in clicked image list.
 $("#bulkMoveFiles").submit(function (event) {
   // get the form data
   var formData = {
@@ -256,11 +274,125 @@ $("#bulkMoveFiles").submit(function (event) {
   event.preventDefault();
 });
 
+$("#scrapeImageModal").submit(function (event) {
+  // get the form data
+  var formData = {
+    imageDescription: $("input[name=imageDescription]").val(),
+    imageCount: $("input[name=imageCount]").val(),
+    scrapeDestination: $("select[name=scrapeDestination]").val(),
+  };
+
+  //finds the last class child of element
+  function last_of_class(elt, cls) {
+    var children = elt.getElementsByClassName(cls);
+    return children[children.length - 1];
+  }
+
+  console.log(formData);
+
+  $.ajax({
+    type: "POST", // define the type of HTTP verb we want to use (POST for our form)
+    contentType: "application/json",
+    url: "_scrape_Request", // the url where we want to POST
+    data: JSON.stringify(formData), // our data object
+    dataType: "json", // what type of data do we expect back from the server
+    encode: true,
+  })
+    // using the done promise callback
+    .done(
+      function (data) {
+        //find last picture box in pictureFrame and insert the following below.
+
+        lastPicture = last_of_class(pictureContainer, "pictureBox");
+        console.log("Last Picture:");
+        console.log(lastPicture);
+        //if picture is successfully downloaded update picture frame.
+        lastPictureIndex = parseInt(
+          lastPicture.id.substring(
+            lastPicture.id.lastIndexOf("/") + 1,
+            lastPicture.id.length + 1
+          )
+        );
+
+        console.log(data);
+        console.log(Object.keys(data).length);
+        logMessages = Object.keys(data).length;
+        alertLog = "";
+        for (x = 0; x < logMessages; x++) {
+          alertLog += data[x] + "\r\n";
+
+          if (data[x].substring(0, 7) == "SUCCESS") {
+            increment = lastPictureIndex + x - 1;
+            //create picture box
+            newPictureBox = document.createElement("div");
+            newPictureBox.setAttribute(
+              "id",
+              data[x].substring(
+                data[x].indexOf("as /static/") + 11,
+                data[x].lastIndexOf("/") + increment
+              )
+            );
+            newPictureBox.setAttribute("class", "pictureBox");
+            newPictureBox.setAttribute(
+              "onClick",
+              "imgClick(" + increment + ")"
+            );
+            console.log("break point");
+            newPicture = document.createElement("img");
+            newPicture.setAttribute("id", increment);
+            newPicture.setAttribute("class", "photo");
+            newPicture.setAttribute(
+              "alt",
+              $("select[name=scrapeDestination]").val()
+            );
+            newPicture.setAttribute(
+              "src",
+              data[x].substring(
+                data[x].indexOf("as /static/") + 4,
+                data[x].length + 1
+              )
+            );
+            //create check mark division
+            checkMarkDiv = document.createElement("div");
+            checkMarkDiv.setAttribute("class", "overlay");
+            checkMarkDiv.setAttribute("id", "c" + increment);
+            //create checkmark image
+            checkMarkImage = document.createElement("img");
+            checkMarkImage.setAttribute("class", "checkmark");
+            checkMarkImage.setAttribute("src", "/static/checkmark.png");
+            //append check mark to picture to checkmark division, append checkmark division to picturebox, append picture to picturebox, append picturebox as
+            pictureContainer.appendChild(newPictureBox);
+            newPictureBox.appendChild(newPicture);
+            newPictureBox.appendChild(checkMarkDiv);
+            checkMarkDiv.appendChild(document.createElement("div"));
+            checkMarkDiv.appendChild(checkMarkImage);
+
+            console.log($("select[name=scrapeDestination]").val());
+            folderSelect($("select[name=scrapeDestination]").val());
+            //rerun show photo function
+          }
+        }
+
+        alert(alertLog);
+        //Update location and hide moved pictures
+        //set clickedImageList = {}
+      }
+
+      // here we will handle errors and validation messages
+    );
+
+  // stop the form from submitting the normal way and refreshing the page
+  event.preventDefault();
+});
+
+//show/hide pictures based upon folder selection.
 function folderSelect(folder) {
   console.log(folder);
   var allPics = document.getElementsByClassName("pictureBox");
   for (i = 0; i < allPics.length; i++) {
-    if (allPics[i].id == folder) {
+    if (
+      allPics[i].id.substring(0, allPics[i].id.lastIndexOf("/") + 1) == folder
+    ) {
       allPics[i].style.display = "block";
     } else {
       console.log(allPics[i].alt);
@@ -269,6 +401,7 @@ function folderSelect(folder) {
   }
 }
 
+//lazy loading of images
 document.addEventListener("DOMContentLoaded", function () {
   var lazyloadImages;
 
