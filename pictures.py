@@ -81,6 +81,7 @@ def pictures():
 
 
 @bp.route('/_update_picture', methods=("GET", "POST"))
+# flag=0 rename individual, flag=1 move bulk
 def update_picture(flag=0, picName=0, picFolder=0):
     if flag == 1:
         newPhotoName = picName[picName.rfind("/")+1: picName.rfind(".")]
@@ -97,13 +98,13 @@ def update_picture(flag=0, picName=0, picFolder=0):
         imgSource = jsonData['imgSource'].replace(
             "http://127.0.0.1:5000/static/", "")
         basePath = "E:/Flask/pictureApp/pictureApp/static/"
-        print(newPhotoName)
-        print(newPhotoPath)
-        print(imgSource)
+        # print(newPhotoName)
+        # print(newPhotoPath)
+        # print(imgSource)
         # begin validation
     if validate_source_photo(imgSource) == False:
         # check that the source picture is in the source picture list.
-        print("_update_picture: Failed destination validate_source_photo")
+        #print("_update_picture: Failed destination validate_source_photo")
         if flag == 0:
             return jsonify(error="Invalid Source Photo")
         else:
@@ -111,7 +112,7 @@ def update_picture(flag=0, picName=0, picFolder=0):
 
     if validate_directory(newPhotoPath) == False:
         # check that the destination path is valid
-        print("_update_picture: failed destination validate_directory")
+        #print("_update_picture: failed destination validate_directory")
         if flag == 0:
             return jsonify(error="Invalid Destination path")
         else:
@@ -119,15 +120,15 @@ def update_picture(flag=0, picName=0, picFolder=0):
 
     if newPhotoName.isalnum() != True:
         # check that a alphanumeric filename is given.
-        print("_update_picture: failed newPhotoName")
+        #print("_update_picture: failed newPhotoName")
         if flag == 0:
             return jsonify(error="Please Provide an alpha-numeric photo name")
-        else:
-            return ["error", "Please Provide an alpha-numeric photo name"]
+        # else:
+            # return ["error", "Please Provide an alpha-numeric photo name"]
 
     if path.exists(basePath + newPhotoPath + newPhotoName) == True:
         # check to see if the filename + path does not already exist.
-        print("_update_picture: failed, picture already exists")
+        #print("_update_picture: failed, picture already exists")
         if flag == 0:
             return jsonify(error="Duplicate file name already exists.")
         else:
@@ -136,14 +137,14 @@ def update_picture(flag=0, picName=0, picFolder=0):
     moveFile = shutil.move(
         basePath + imgSource, basePath + newPhotoPath + "/" + newPhotoName + ".jpg")
     moveFile
-    print(moveFile)  # return new files, path, popup with result of move
+    # print(moveFile)  # return new files, path, popup with result of move
 
     # update picture name and location in website and sidebar.
-    print("picture renamed!")
+    print("picture renamed/moved!")
     if flag == 0:
-        return jsonify(error="none", success="File Renamed: " + newPhotoName + "and saved in folder: " + newPhotoPath)
+        return jsonify(error="none", success="File Renamed: " + newPhotoName + " and saved in folder: " + newPhotoPath)
     else:
-        return ["none", "File Renamed: " + newPhotoName + "and saved in folder: " + newPhotoPath]
+        return ["none", "File Renamed: " + newPhotoName + " and saved in folder: " + newPhotoPath]
 
 
 @ bp.route('/_new_folder', methods=("GET", "POST"))
@@ -156,22 +157,22 @@ def newFolder():
         newFolderPath = jsonData['newFolderPath']
         basePath = "E:/Flask/pictureApp/pictureApp/static/"
 
-        print(newFolder)
-        print(newFolderPath)
+        # print(newFolder)
+        # print(newFolderPath)
 
         if path.exists(basePath + newFolderPath + newFolder) == True:
             # check to see if the filename + path does not already exist.
-            print("_new_folder: failed, folder directory already exists")
+            #print("_new_folder: failed, folder directory already exists")
             return jsonify(error="Duplicate file path already exists.")
 
         if validate_directory(newFolderPath) == False:
             # check the the file path specified exists
-            print("_new_folder: failed destination validate_directory")
+            #print("_new_folder: failed destination validate_directory")
             return jsonify(error="Invalid folder path")
 
         if newFolder.isalnum() != True:
             # check that the folder name is valid (limit alpha/numeric)
-            print("_update_picture: failed newPhotoName")
+            #print("_update_picture: failed newPhotoName")
             return jsonify(error="Please Provide an alpha-numeric photo name")
 
         mkdir(basePath + newFolderPath + newFolder)
@@ -182,7 +183,6 @@ def newFolder():
 def bulkMovePictures():
 
     if request.method == "POST":
-        # print(request.is_json) #content = request.get_json() # print(content)
         jsonData = request.get_json()
         moveFiles = jsonData['selectedPictures']
         MoveDestination = jsonData['newFolderPath']

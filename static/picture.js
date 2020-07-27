@@ -1,7 +1,7 @@
 let clickedImageList = {};
 let staticPath = "E:/Flask/pictureApp/pictureApp/static/pictures/";
-let visableFolder = "";
-
+let visableFolder = "pictures/";
+//finds image name
 function getFileName(indexRef) {
   imagePath = clickedImageList[indexRef];
 
@@ -12,7 +12,7 @@ function getFileName(indexRef) {
 
   return fileName;
 }
-
+//finds image filepath
 function getFilePath(indexRef) {
   imagePath = clickedImageList[indexRef];
   filePath = imagePath.substring(
@@ -21,7 +21,7 @@ function getFilePath(indexRef) {
   );
   return filePath;
 }
-
+//toggles image hidden/visable
 function imgClick(myArg) {
   var clickedImage = document.getElementById(myArg);
   var clickCheckBox = document.getElementById("c" + myArg);
@@ -99,18 +99,25 @@ function resetNav() {
     closeNav();
   }
 }
-
+//updates folder dropdowns
 function addFolderDropdown(folderPath) {
-  // Create an Option object
-  var opt = document.createElement("option");
+  function updateDropdownWith() {
+    var opt = document.createElement("option");
+    opt.text = folderPath;
+    opt.value = folderPath;
+    return opt;
+  }
 
-  // Assign text and value to Option object
-  opt.text = folderPath;
-  opt.value = folderPath;
-
-  // Add an Option object to Drop Down List Box
-  document.getElementById("newFolderFilePath").options.add(opt);
-  document.getElementById("modalFilePath").options.add(opt);
+  console.log("Updating drop downs");
+  document
+    .getElementById("newFolderFilePath")
+    .options.add(updateDropdownWith());
+  document
+    .getElementById("bulkDestinationPath")
+    .options.add(updateDropdownWith());
+  document
+    .getElementById("scrapeDestination")
+    .options.add(updateDropdownWith());
   document.getElementById("topBarFolderList").innerHTML +=
     "<a href='#' onclick=folderSelect('" +
     folderPath +
@@ -247,7 +254,7 @@ $("#bulkMoveFiles").submit(function (event) {
     newFolderPath: $("select[name=bulkDestinationPath]").val(),
   };
 
-  console.log(formData);
+  newFolder = $("select[name=bulkDestinationPath]").val();
 
   $.ajax({
     type: "POST", // define the type of HTTP verb we want to use (POST for our form)
@@ -261,10 +268,26 @@ $("#bulkMoveFiles").submit(function (event) {
     .done(
       function (data) {
         // log data to the console so we can see
-        console.log(data);
-        alert(data);
-        //Update location and hide moved pictures
-        //set clickedImageList = {}
+        alert("Move Complete");
+
+        movedPictureKeys = Object.keys(clickedImageList);
+        for (i = 0; i < Object.keys(clickedImageList).length; i++) {
+          updateImage = document.getElementById(movedPictureKeys[i]);
+          updatePictureFrame = document.getElementById(
+            updateImage.alt + movedPictureKeys[i]
+          );
+          updateImage.src = updateImage.src.replace(
+            updateImage.alt,
+            newFolder + "/"
+          );
+          updateImage.alt = newFolder + "/";
+          updatePictureFrame.id = newFolder + "/" + movedPictureKeys[i];
+          console.log(
+            "restart loop " + i + " " + Object.keys(clickedImageList).length
+          );
+        }
+        resetNav();
+        folderSelect(visableFolder);
       }
 
       // here we will handle errors and validation messages
@@ -387,7 +410,7 @@ $("#scrapeImageModal").submit(function (event) {
 
 //show/hide pictures based upon folder selection.
 function folderSelect(folder) {
-  console.log(folder);
+  console.log("show folder: " + folder);
   var allPics = document.getElementsByClassName("pictureBox");
   for (i = 0; i < allPics.length; i++) {
     if (
@@ -399,6 +422,7 @@ function folderSelect(folder) {
       allPics[i].style.display = "none";
     }
   }
+  visableFolder = folder;
 }
 
 //lazy loading of images

@@ -147,7 +147,7 @@ div.pictureBox {
   position: relative;
   max-width: 25%;
   min-width: 25%;
-  max-height: 30%;
+  max-height: 25%;
   overflow-y: hidden;
   opacity: 1;
 }
