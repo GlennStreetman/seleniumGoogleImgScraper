@@ -1,6 +1,7 @@
 let clickedImageList = {};
 let staticPath = "E:/Flask/pictureApp/pictureApp/static/pictures/";
 let visableFolder = "pictures/";
+folderSelect(visableFolder);
 //finds image name
 function getFileName(indexRef) {
   imagePath = clickedImageList[indexRef];
@@ -253,6 +254,8 @@ $("#bulkMoveFiles").submit(function (event) {
     selectedPictures: clickedImageList,
     newFolderPath: $("select[name=bulkDestinationPath]").val(),
   };
+  //set to zero when update is complete to end live update.
+  liveUpdate = 1;
 
   newFolder = $("select[name=bulkDestinationPath]").val();
 
@@ -263,36 +266,57 @@ $("#bulkMoveFiles").submit(function (event) {
     data: JSON.stringify(formData), // our data object
     dataType: "json", // what type of data do we expect back from the server
     encode: true,
-  })
-    // using the done promise callback
-    .done(
-      function (data) {
-        // log data to the console so we can see
-        alert("Move Complete");
-
-        movedPictureKeys = Object.keys(clickedImageList);
-        for (i = 0; i < Object.keys(clickedImageList).length; i++) {
-          updateImage = document.getElementById(movedPictureKeys[i]);
-          updatePictureFrame = document.getElementById(
-            updateImage.alt + movedPictureKeys[i]
-          );
-          updateImage.src = updateImage.src.replace(
-            updateImage.alt,
-            newFolder + "/"
-          );
-          updateImage.alt = newFolder + "/";
-          updatePictureFrame.id = newFolder + "/" + movedPictureKeys[i];
-          console.log(
-            "restart loop " + i + " " + Object.keys(clickedImageList).length
-          );
-        }
-        resetNav();
-        folderSelect(visableFolder);
+  }).done(
+    function (data) {
+      //log data to the console so we can see
+      console.log(data.length);
+      document.getElementById("BM1").innerHTML = "";
+      for (let i = 0; i < data.length; i++) {
+        document.getElementById("BM1").innerHTML += data[i];
+        document.getElementById("BM1").innerHTML += "<br>";
       }
-
-      // here we will handle errors and validation messages
-    );
-
+      alert("Move Complete");
+      liveUpdate = 0;
+      movedPictureKeys = Object.keys(clickedImageList);
+      for (let i = 0; i < Object.keys(clickedImageList).length; i++) {
+        updateImage = document.getElementById(movedPictureKeys[i]);
+        updatePictureFrame = document.getElementById(
+          updateImage.alt + movedPictureKeys[i]
+        );
+        updateImage.src = updateImage.src.replace(updateImage.alt, newFolder);
+        updateImage.alt = newFolder;
+        updatePictureFrame.id = newFolder + movedPictureKeys[i];
+      }
+      resetNav();
+      folderSelect(visableFolder);
+    }
+    // here we will handle errors and validation messages
+  ),
+    (liveLog = setInterval(function updateLog(data) {
+      // console.log("Running update log");
+      $.ajax({
+        type: "GET", // define the type of HTTP verb we want to use (POST for our form)
+        contentType: "application/json",
+        url: "_bulk_Move", // the url where we want to POST
+        data: JSON.stringify(formData),
+        dataType: "json", // what type of data do we expect back from the server
+        encode: true,
+        success: function (data) {
+          console.log("Is data received?");
+          console.log(data);
+          document.getElementById("BM1").innerHTML = "";
+          for (let i = 0; i < data.length; i++) {
+            console.log("updating status");
+            document.getElementById("BM1").innerHTML += data[i];
+            document.getElementById("BM1").innerHTML += "<br>";
+          }
+          if (liveUpdate != 1) {
+            console.log("turning off");
+            clearInterval(liveLog);
+          }
+        },
+      });
+    }, 1000));
   // stop the form from submitting the normal way and refreshing the page
   event.preventDefault();
 });
@@ -312,6 +336,7 @@ $("#scrapeImageModal").submit(function (event) {
   }
 
   console.log(formData);
+  scrapeProgress = 1;
 
   $.ajax({
     type: "POST", // define the type of HTTP verb we want to use (POST for our form)
@@ -325,7 +350,7 @@ $("#scrapeImageModal").submit(function (event) {
     .done(
       function (data) {
         //find last picture box in pictureFrame and insert the following below.
-
+        scrapeProgress = 0;
         lastPicture = last_of_class(pictureContainer, "pictureBox");
         console.log("Last Picture:");
         console.log(lastPicture);
@@ -397,12 +422,33 @@ $("#scrapeImageModal").submit(function (event) {
         }
 
         alert(alertLog);
-        //Update location and hide moved pictures
-        //set clickedImageList = {}
       }
 
       // here we will handle errors and validation messages
     );
+  // ,
+  // (scrapeLog = setInterval(function scrapePictureLog(data) {
+  //   $.ajax({
+  //     type: "GET", // define the type of HTTP verb we want to use (POST for our form)
+  //     contentType: "application/json",
+  //     url: "_scrape_Request", // the url where we want to POST
+  //     data: JSON.stringify(formData), // our data object
+  //     dataType: "json", // what type of data do we expect back from the server
+  //     encode: true,
+  //     success: function (data) {
+  //       document.getElementById("SI1").innerHTML = "";
+  //       for (let i = 0; i < data.length; i++) {
+  //         console.log("updating status");
+  //         document.getElementById("SI1").innerHTML += data[i];
+  //         document.getElementById("SI1").innerHTML += "<br>";
+  //       }
+  //       if (scrapeProgress != 1) {
+  //         console.log("turning off");
+  //         clearInterval(scrapeLog);
+  //       }
+  //     },
+  //   });
+  // }, 1000));
 
   // stop the form from submitting the normal way and refreshing the page
   event.preventDefault();
@@ -422,6 +468,8 @@ function folderSelect(folder) {
       allPics[i].style.display = "none";
     }
   }
+  document.getElementById("currentDirectory").innerHTML =
+    "Current Folder: " + folder;
   visableFolder = folder;
 }
 

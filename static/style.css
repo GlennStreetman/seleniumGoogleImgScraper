@@ -95,6 +95,17 @@ button.topBar {
   float: left;
   display: block;
 }
+button.topBarRight {
+  background-color: #222;
+  border: none;
+  color: white;
+  padding: 16px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  float: right;
+  align-self: right;
+  display: block;
+}
 
 li.active {
   box-sizing: border-box;

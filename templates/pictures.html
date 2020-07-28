@@ -30,7 +30,7 @@
       <nav class="navbar navbar-inverse sticky-top">
         <div class="container-fluid">
           <div class="navbar-header">
-            <a class="navbar-brand" href="#">Google Image Scrape</a>
+            <a class="navbar-brand" href="#">Image Scrape</a>
           </div>
           <ul class="nav navbar-nav">
             <li>
@@ -40,7 +40,7 @@
             </li>
             <li>
               <div class="dropdown">
-                <button class="dropbtn" onclick="">Folders</button>
+                <button class="dropbtn" onclick="">Change Folder</button>
                 <div id="topBarFolderList" class="dropdown-content">
                   {% for dir in dirs %}
                   <a href="#" onclick="folderSelect('{{ dir[1] }}');">
@@ -58,7 +58,13 @@
             </li>
             <li>
               <button id="scrapeGoogle" class="topBar" onclick="showModal('scrapeImageModal')">
-                Scrape Images
+                Search for Images
+                <!-- create a newFolder function that uses ajax. -->
+              </button>
+            </li>
+            <li>
+              <button id="currentDirectory" class="topBarRight" onclick="">
+                Current Folder: pictures/
                 <!-- create a newFolder function that uses ajax. -->
               </button>
             </li>
@@ -199,10 +205,10 @@
               </form>
               <!-- <p id="modalFilePath">Some text in the modal.</p> -->
             </div> 
-            <div class="modal-body">
-              Bulk move selected files to:
+            <div id="BM1" class="modal-body">
+              
             </div>
-            <div class="modal-footer">
+            <div  class="modal-footer">
               <button
                 type="button"
                 class="btn btn-default"
@@ -253,7 +259,7 @@
                   </form>
                   <!-- <p id="modalFilePath">Some text in the modal.</p> -->
                 </div> 
-                <div class="modal-body">
+                <div id = "SI1" class="modal-body">
                   Scrape specified number of images from Google image search.
                 </div>
                 <div class="modal-footer">

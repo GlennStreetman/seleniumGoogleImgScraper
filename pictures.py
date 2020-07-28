@@ -22,7 +22,7 @@ from os import mkdir
 import shutil
 import json
 import requests
-from imageScrapeGoogle import scrape_Google_Images
+from .imageScrapeGoogle import scrape_Google_Images
 
 bp = Blueprint("pictures", __name__)
 
@@ -67,9 +67,9 @@ def validate_directory(testDir: str) -> bool:
 
 
 def validate_source_photo(testPhoto: str) -> bool:
-    print("test photo validation: " + testPhoto)
+    #print("test photo validation: " + testPhoto)
     for photo in find_unsorted_pics():
-        print(photo[1])
+        # print(photo[1])
         if testPhoto == photo[1].replace("static/", ""):
             return True
     return False
@@ -140,7 +140,7 @@ def update_picture(flag=0, picName=0, picFolder=0):
     # print(moveFile)  # return new files, path, popup with result of move
 
     # update picture name and location in website and sidebar.
-    print("picture renamed/moved!")
+    #print("picture renamed/moved!")
     if flag == 0:
         return jsonify(error="none", success="File Renamed: " + newPhotoName + " and saved in folder: " + newPhotoPath)
     else:
@@ -181,25 +181,35 @@ def newFolder():
 
 @ bp.route('/_bulk_Move', methods=("GET", "POST"))
 def bulkMovePictures():
-
+    global moveLog
+    # Post to start move, GET to live update user on status.
     if request.method == "POST":
+        moveLog = []
         jsonData = request.get_json()
         moveFiles = jsonData['selectedPictures']
         MoveDestination = jsonData['newFolderPath']
-        moveLog = []
 
         for file in moveFiles:
+            print(file)
             updatedPic = update_picture(
                 1, moveFiles[file], MoveDestination)
             moveLog.append(updatedPic[1])
 
-        print("Bulk Move Complete")
+        #finalLog = moveLog("Complete", 0)
 
-        return jsonify(log=moveLog)
+        print("Bulk Move Complete")
+        print(moveLog)
+        return jsonify(moveLog)
+    # return live update log
+    if request.method == "GET":
+        print("returning partial move log")
+        print(moveLog)
+        return jsonify(moveLog)
 
 
 @ bp.route('/_scrape_Request', methods=("GET", "POST"))
 def scrape_Picture_Request():
+
     if request.method == "POST":
 
         jsonData = request.get_json()
@@ -209,7 +219,9 @@ def scrape_Picture_Request():
         staticPath = "E:/Flask/pictureApp/pictureApp/static/"
         saveTo = staticPath + jsonData['scrapeDestination']
 
-        print(searchTerm, scrapeCount, saveTo)
-        print('-----------')
-
         return scrape_Google_Images(searchTerm, saveTo, scrapeCount)
+
+    # if request.method == "GET":
+    #     print("returning scrape status")
+    #     # print(picture_log)
+    #     return jsonify(picture_log)
