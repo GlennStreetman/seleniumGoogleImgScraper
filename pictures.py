@@ -23,6 +23,7 @@ import shutil
 import json
 import requests
 from .imageScrapeGoogle import scrape_Google_Images
+from .imageScrapeGoogle import logStatus
 
 bp = Blueprint("pictures", __name__)
 
@@ -210,18 +211,20 @@ def bulkMovePictures():
 @ bp.route('/_scrape_Request', methods=("GET", "POST"))
 def scrape_Picture_Request():
 
+    global runLog
+
     if request.method == "POST":
 
         jsonData = request.get_json()
-
+        runLog = {0: "spinning up scrape request"}
         searchTerm = jsonData['imageDescription']
         scrapeCount = int(jsonData['imageCount'])
         staticPath = "E:/Flask/pictureApp/pictureApp/static/"
         saveTo = staticPath + jsonData['scrapeDestination']
 
-        return scrape_Google_Images(searchTerm, saveTo, scrapeCount)
+        scrapeRequest = scrape_Google_Images(searchTerm, saveTo, scrapeCount)
+        runLog = scrapeRequest
+        return scrapeRequest
 
-    # if request.method == "GET":
-    #     print("returning scrape status")
-    #     # print(picture_log)
-    #     return jsonify(picture_log)
+    if request.method == "GET":
+        return jsonify(logStatus())

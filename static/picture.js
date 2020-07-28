@@ -365,9 +365,9 @@ $("#scrapeImageModal").submit(function (event) {
         console.log(data);
         console.log(Object.keys(data).length);
         logMessages = Object.keys(data).length;
-        alertLog = "";
         for (x = 0; x < logMessages; x++) {
-          alertLog += data[x] + "\r\n";
+          document.getElementById("SI1").innerHTML += data[x];
+          document.getElementById("SI1").innerHTML += "<br>";
 
           if (data[x].substring(0, 7) == "SUCCESS") {
             increment = lastPictureIndex + x - 1;
@@ -420,35 +420,34 @@ $("#scrapeImageModal").submit(function (event) {
             //rerun show photo function
           }
         }
-
-        alert(alertLog);
       }
 
       // here we will handle errors and validation messages
-    );
-  // ,
-  // (scrapeLog = setInterval(function scrapePictureLog(data) {
-  //   $.ajax({
-  //     type: "GET", // define the type of HTTP verb we want to use (POST for our form)
-  //     contentType: "application/json",
-  //     url: "_scrape_Request", // the url where we want to POST
-  //     data: JSON.stringify(formData), // our data object
-  //     dataType: "json", // what type of data do we expect back from the server
-  //     encode: true,
-  //     success: function (data) {
-  //       document.getElementById("SI1").innerHTML = "";
-  //       for (let i = 0; i < data.length; i++) {
-  //         console.log("updating status");
-  //         document.getElementById("SI1").innerHTML += data[i];
-  //         document.getElementById("SI1").innerHTML += "<br>";
-  //       }
-  //       if (scrapeProgress != 1) {
-  //         console.log("turning off");
-  //         clearInterval(scrapeLog);
-  //       }
-  //     },
-  //   });
-  // }, 1000));
+    ),
+    (scrapeLog = setInterval(function scrapePictureLog(data) {
+      $.ajax({
+        type: "GET", // define the type of HTTP verb we want to use (POST for our form)
+        contentType: "application/json",
+        url: "_scrape_Request", // the url where we want to POST
+        data: JSON.stringify(formData), // our data object
+        dataType: "json", // what type of data do we expect back from the server
+        encode: true,
+        success: function (data) {
+          console.log(data);
+          document.getElementById("SI1").innerHTML = "";
+          for (let i = 0; i < Object.keys(data).length; i++) {
+            console.log("updating status");
+            document.getElementById("SI1").innerHTML += data[i];
+            document.getElementById("SI1").innerHTML += "<br>";
+          }
+          console.log("still on: " + scrapeProgress);
+          if (scrapeProgress != 1) {
+            console.log("turning off");
+            clearInterval(scrapeLog);
+          }
+        },
+      });
+    }, 1000));
 
   // stop the form from submitting the normal way and refreshing the page
   event.preventDefault();

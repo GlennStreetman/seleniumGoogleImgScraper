@@ -7,11 +7,14 @@ import hashlib
 from PIL import Image
 from selenium import webdriver
 
+picture_log = {0: "Spinning up scrape request"}
+
 
 def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pictures', img_count=5):
+    global picture_log
+    picture_log = {0: "Spinning up scrape request"}
     DRIVER_PATH = "E:/Flask/pictureApp/chromedriver.exe"
     wd = webdriver.Chrome(executable_path=DRIVER_PATH)
-    picture_log = {}
 
     def fetch_image_urls(query: str, max_links_to_fetch: int, wd: webdriver, sleep_between_interactions: int = 1):
         def scroll_to_end(wd):
@@ -120,4 +123,8 @@ def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pict
             persist_image(target_folder, elem)
 
     search_and_download(search_term, DRIVER_PATH, target_path, img_count)
+    return picture_log
+
+
+def logStatus():
     return picture_log
