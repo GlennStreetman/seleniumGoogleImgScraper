@@ -94,11 +94,13 @@ function closeNav() {
 
 //refreshes sidebar content.
 function resetNav() {
-  for (img in clickedImageList) {
-    imgClick(img);
-    updateNav();
-    closeNav();
+  if (Object.keys(clickedImageList).length != 0) {
+    for (img in clickedImageList) {
+      imgClick(img);
+    }
   }
+  updateNav();
+  closeNav();
 }
 //updates folder dropdowns
 function addFolderDropdown(folderPath) {
@@ -186,17 +188,30 @@ $("#picInfoForm").submit(function (event) {
         alert(data["success"]);
         document.getElementById("renamePictureModal").click();
         modalPhotoID = document.getElementsByName("modalPhoto")[0].id;
-        document.getElementById(modalPhotoID[1]).src =
-          "static/" +
-          formData["newPhotoSource"] +
-          formData["newPhotoName"] +
-          ".jpg"; //rename photo in photo pane.
-        clickedImageList[modalPhotoID[1]] =
+        modalPhotoAlt = document.getElementById(modalPhotoID[1]).alt;
+
+        updatePictureDetails = document.getElementById(modalPhotoID[1]);
+        updatePictureDetails.src =
           "static/" +
           formData["newPhotoSource"] +
           formData["newPhotoName"] +
           ".jpg";
+        updatePictureDetails.alt = formData["newPhotoSource"];
+        movePictureFrame = document.getElementById(
+          modalPhotoAlt + modalPhotoID[1]
+        );
+        movePictureFrame.id = formData["newPhotoSource"] + modalPhotoID[1];
+
+        //rename photo in photo pane.
+        clickedImageList[modalPhotoID[1]] =
+          "static/" +
+          formData["newPhotoSavePath"] +
+          formData["newPhotoName"] +
+          ".jpg";
+        delete clickedImageList[modalPhotoID[1]];
+        imgClick(modalPhotoID[1]);
         updateNav();
+        folderSelect(visableFolder);
       }
 
       // here we will handle errors and validation messages
@@ -352,8 +367,6 @@ $("#scrapeImageModal").submit(function (event) {
         //find last picture box in pictureFrame and insert the following below.
         scrapeProgress = 0;
         lastPicture = last_of_class(pictureContainer, "pictureBox");
-        console.log("Last Picture:");
-        console.log(lastPicture);
         //if picture is successfully downloaded update picture frame.
         lastPictureIndex = parseInt(
           lastPicture.id.substring(
@@ -362,8 +375,6 @@ $("#scrapeImageModal").submit(function (event) {
           )
         );
 
-        console.log(data);
-        console.log(Object.keys(data).length);
         logMessages = Object.keys(data).length;
         for (x = 0; x < logMessages; x++) {
           document.getElementById("SI1").innerHTML += data[x];
@@ -373,19 +384,13 @@ $("#scrapeImageModal").submit(function (event) {
             increment = lastPictureIndex + x - 1;
             //create picture box
             newPictureBox = document.createElement("div");
-            newPictureBox.setAttribute(
-              "id",
-              data[x].substring(
-                data[x].indexOf("as /static/") + 11,
-                data[x].lastIndexOf("/") + increment
-              )
-            );
+            newPictureBox.setAttribute("id", "pictures/" + increment);
+
             newPictureBox.setAttribute("class", "pictureBox");
             newPictureBox.setAttribute(
               "onClick",
               "imgClick(" + increment + ")"
             );
-            console.log("break point");
             newPicture = document.createElement("img");
             newPicture.setAttribute("id", increment);
             newPicture.setAttribute("class", "photo");
@@ -400,19 +405,23 @@ $("#scrapeImageModal").submit(function (event) {
                 data[x].length + 1
               )
             );
+            newPicture.setAttribute("style", "opacity: 1");
+
             //create check mark division
             checkMarkDiv = document.createElement("div");
             checkMarkDiv.setAttribute("class", "overlay");
             checkMarkDiv.setAttribute("id", "c" + increment);
+            checkMarkDiv.setAttribute("style", "opacity: 0");
+            checkMarkDiv.innerHTML = "<h1>" + increment + "</h1>";
             //create checkmark image
             checkMarkImage = document.createElement("img");
-            checkMarkImage.setAttribute("class", "checkmark");
+            checkMarkImage.setAttribute("class", "checkMark");
             checkMarkImage.setAttribute("src", "/static/checkmark.png");
             //append check mark to picture to checkmark division, append checkmark division to picturebox, append picture to picturebox, append picturebox as
             pictureContainer.appendChild(newPictureBox);
             newPictureBox.appendChild(newPicture);
             newPictureBox.appendChild(checkMarkDiv);
-            checkMarkDiv.appendChild(document.createElement("div"));
+            // checkMarkDiv.appendChild(document.createElement("div"));
             checkMarkDiv.appendChild(checkMarkImage);
 
             console.log($("select[name=scrapeDestination]").val());
@@ -433,10 +442,10 @@ $("#scrapeImageModal").submit(function (event) {
         dataType: "json", // what type of data do we expect back from the server
         encode: true,
         success: function (data) {
-          console.log(data);
+          // console.log(data);
           document.getElementById("SI1").innerHTML = "";
           for (let i = 0; i < Object.keys(data).length; i++) {
-            console.log("updating status");
+            // console.log("updating status");
             document.getElementById("SI1").innerHTML += data[i];
             document.getElementById("SI1").innerHTML += "<br>";
           }
