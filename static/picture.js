@@ -338,10 +338,22 @@ $("#bulkMoveFiles").submit(function (event) {
 
 $("#scrapeImageModal").submit(function (event) {
   // get the form data
+  requestID = $("input[name=imageDescription]").val() + new Date().getTime();
+
   var formData = {
     imageDescription: $("input[name=imageDescription]").val(),
     imageCount: $("input[name=imageCount]").val(),
     scrapeDestination: $("select[name=scrapeDestination]").val(),
+    requestName: requestID,
+    postType: "Scrape",
+  };
+
+  var formDataStatus = {
+    imageDescription: $("input[name=imageDescription]").val(),
+    imageCount: $("input[name=imageCount]").val(),
+    scrapeDestination: $("select[name=scrapeDestination]").val(),
+    requestName: requestID,
+    postType: "Log",
   };
 
   //finds the last class child of element
@@ -362,83 +374,76 @@ $("#scrapeImageModal").submit(function (event) {
     encode: true,
   })
     // using the done promise callback
-    .done(
-      function (data) {
-        //find last picture box in pictureFrame and insert the following below.
-        scrapeProgress = 0;
-        lastPicture = last_of_class(pictureContainer, "pictureBox");
-        //if picture is successfully downloaded update picture frame.
-        lastPictureIndex = parseInt(
-          lastPicture.id.substring(
-            lastPicture.id.lastIndexOf("/") + 1,
-            lastPicture.id.length + 1
-          )
-        );
+    .done(function (data) {
+      //find last picture box in pictureFrame and insert the following below.
+      scrapeProgress = 0;
+      lastPicture = last_of_class(pictureContainer, "pictureBox");
+      //if picture is successfully downloaded update picture frame.
+      lastPictureIndex = parseInt(
+        lastPicture.id.substring(
+          lastPicture.id.lastIndexOf("/") + 1,
+          lastPicture.id.length + 1
+        )
+      );
 
-        logMessages = Object.keys(data).length;
-        for (x = 0; x < logMessages; x++) {
-          document.getElementById("SI1").innerHTML += data[x];
-          document.getElementById("SI1").innerHTML += "<br>";
+      logMessages = Object.keys(data).length;
+      for (x = 0; x < logMessages; x++) {
+        document.getElementById("SI1").innerHTML += data[x];
+        document.getElementById("SI1").innerHTML += "<br>";
 
-          if (data[x].substring(0, 7) == "SUCCESS") {
-            increment = lastPictureIndex + x - 1;
-            //create picture box
-            newPictureBox = document.createElement("div");
-            newPictureBox.setAttribute("id", "pictures/" + increment);
+        if (data[x].substring(0, 7) == "SUCCESS") {
+          increment = lastPictureIndex + x - 1;
+          //create picture box
+          newPictureBox = document.createElement("div");
+          newPictureBox.setAttribute("id", "pictures/" + increment);
 
-            newPictureBox.setAttribute("class", "pictureBox");
-            newPictureBox.setAttribute(
-              "onClick",
-              "imgClick(" + increment + ")"
-            );
-            newPicture = document.createElement("img");
-            newPicture.setAttribute("id", increment);
-            newPicture.setAttribute("class", "photo");
-            newPicture.setAttribute(
-              "alt",
-              $("select[name=scrapeDestination]").val()
-            );
-            newPicture.setAttribute(
-              "src",
-              data[x].substring(
-                data[x].indexOf("as /static/") + 4,
-                data[x].length + 1
-              )
-            );
-            newPicture.setAttribute("style", "opacity: 1");
+          newPictureBox.setAttribute("class", "pictureBox");
+          newPictureBox.setAttribute("onClick", "imgClick(" + increment + ")");
+          newPicture = document.createElement("img");
+          newPicture.setAttribute("id", increment);
+          newPicture.setAttribute("class", "photo");
+          newPicture.setAttribute(
+            "alt",
+            $("select[name=scrapeDestination]").val()
+          );
+          newPicture.setAttribute(
+            "src",
+            data[x].substring(
+              data[x].indexOf("as /static/") + 4,
+              data[x].length + 1
+            )
+          );
+          newPicture.setAttribute("style", "opacity: 1");
 
-            //create check mark division
-            checkMarkDiv = document.createElement("div");
-            checkMarkDiv.setAttribute("class", "overlay");
-            checkMarkDiv.setAttribute("id", "c" + increment);
-            checkMarkDiv.setAttribute("style", "opacity: 0");
-            checkMarkDiv.innerHTML = "<h1>" + increment + "</h1>";
-            //create checkmark image
-            checkMarkImage = document.createElement("img");
-            checkMarkImage.setAttribute("class", "checkMark");
-            checkMarkImage.setAttribute("src", "/static/checkmark.png");
-            //append check mark to picture to checkmark division, append checkmark division to picturebox, append picture to picturebox, append picturebox as
-            pictureContainer.appendChild(newPictureBox);
-            newPictureBox.appendChild(newPicture);
-            newPictureBox.appendChild(checkMarkDiv);
-            // checkMarkDiv.appendChild(document.createElement("div"));
-            checkMarkDiv.appendChild(checkMarkImage);
+          //create check mark division
+          checkMarkDiv = document.createElement("div");
+          checkMarkDiv.setAttribute("class", "overlay");
+          checkMarkDiv.setAttribute("id", "c" + increment);
+          checkMarkDiv.setAttribute("style", "opacity: 0");
+          checkMarkDiv.innerHTML = "<h1>" + increment + "</h1>";
+          //create checkmark image
+          checkMarkImage = document.createElement("img");
+          checkMarkImage.setAttribute("class", "checkMark");
+          checkMarkImage.setAttribute("src", "/static/checkmark.png");
+          //append check mark to picture to checkmark division, append checkmark division to picturebox, append picture to picturebox, append picturebox as
+          pictureContainer.appendChild(newPictureBox);
+          newPictureBox.appendChild(newPicture);
+          newPictureBox.appendChild(checkMarkDiv);
+          // checkMarkDiv.appendChild(document.createElement("div"));
+          checkMarkDiv.appendChild(checkMarkImage);
 
-            console.log($("select[name=scrapeDestination]").val());
-            folderSelect($("select[name=scrapeDestination]").val());
-            //rerun show photo function
-          }
+          console.log($("select[name=scrapeDestination]").val());
+          folderSelect($("select[name=scrapeDestination]").val());
+          //rerun show photo function
         }
       }
-
-      // here we will handle errors and validation messages
-    ),
+    }),
     (scrapeLog = setInterval(function scrapePictureLog(data) {
       $.ajax({
-        type: "GET", // define the type of HTTP verb we want to use (POST for our form)
+        type: "POST", // define the type of HTTP verb we want to use (POST for our form)
         contentType: "application/json",
         url: "_scrape_Request", // the url where we want to POST
-        data: JSON.stringify(formData), // our data object
+        data: JSON.stringify(formDataStatus), // our data object
         dataType: "json", // what type of data do we expect back from the server
         encode: true,
         success: function (data) {

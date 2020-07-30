@@ -7,12 +7,10 @@ import hashlib
 from PIL import Image
 from selenium import webdriver
 
-picture_log = {0: "Spinning up scrape request"}
 
+def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pictures', img_count=5, picture_log={}):
 
-def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pictures', img_count=5):
-    global picture_log
-    picture_log = {0: "Spinning up scrape request"}
+    picture_log
     DRIVER_PATH = "E:/Flask/pictureApp/chromedriver.exe"
     wd = webdriver.Chrome(executable_path=DRIVER_PATH)
 
