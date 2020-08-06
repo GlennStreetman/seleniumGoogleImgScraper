@@ -144,22 +144,16 @@ function hideModal() {
   modal = document.getElementById("pictureModal");
   modal.style.display = "none";
 }
-
+//  sets target of hidden button then clicks to show target modal.
 function showModal(modalName) {
+  console.log(modalName);
   target = document.getElementById("showModalButton");
   target.dataset.target = "#" + modalName;
   target.click();
+  // dragElement(document.getElementById(modalName));
 }
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-  modal = document.getElementById("pictureModal");
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-};
-
-// submit rename picture model. getelementbyid
+// submit rename picture modal. getelementbyid
 $("#picInfoForm").submit(function (event) {
   // get the form data
   var formData = {
@@ -336,140 +330,33 @@ $("#bulkMoveFiles").submit(function (event) {
   event.preventDefault();
 });
 
-$("#scrapeImageModal").submit(function (event) {
-  // get the form data
-  requestID = $("input[name=imageDescription]").val() + new Date().getTime();
-
-  var formData = {
-    imageDescription: $("input[name=imageDescription]").val(),
-    imageCount: $("input[name=imageCount]").val(),
-    scrapeDestination: $("select[name=scrapeDestination]").val(),
-    requestName: requestID,
-    postType: "Scrape",
-  };
-
-  var formDataStatus = {
-    imageDescription: $("input[name=imageDescription]").val(),
-    imageCount: $("input[name=imageCount]").val(),
-    scrapeDestination: $("select[name=scrapeDestination]").val(),
-    requestName: requestID,
-    postType: "Log",
-  };
-
-  //finds the last class child of element
-  function last_of_class(elt, cls) {
-    var children = elt.getElementsByClassName(cls);
-    return children[children.length - 1];
+//create new google image scrape modal.
+function newScrapeModal() {
+  newModalID = new Date().getTime();
+  newModalHTML = $("#createScrapeModal").html();
+  newModalHTML = newModalHTML.replaceAll("@@id", newModalID);
+  document.getElementById("modalHook").innerHTML += newModalHTML;
+  showModalString = "scrapeImageModal" + newModalID;
+  for (dir in appDirs) {
+    dirOption = document.createElement("option");
+    dirOption.setAttribute("value", appDirs[dir]);
+    dirOption.innerHTML = appDirs[dir];
+    document
+      .getElementById("scrapeDestination" + newModalID)
+      .options.add(dirOption);
   }
+  showModal(showModalString);
+}
 
-  console.log(formData);
-  scrapeProgress = 1;
-
-  $.ajax({
-    type: "POST", // define the type of HTTP verb we want to use (POST for our form)
-    contentType: "application/json",
-    url: "_scrape_Request", // the url where we want to POST
-    data: JSON.stringify(formData), // our data object
-    dataType: "json", // what type of data do we expect back from the server
-    encode: true,
-  })
-    // using the done promise callback
-    .done(function (data) {
-      //find last picture box in pictureFrame and insert the following below.
-      scrapeProgress = 0;
-      lastPicture = last_of_class(pictureContainer, "pictureBox");
-      //if picture is successfully downloaded update picture frame.
-      lastPictureIndex = parseInt(
-        lastPicture.id.substring(
-          lastPicture.id.lastIndexOf("/") + 1,
-          lastPicture.id.length + 1
-        )
-      );
-
-      logMessages = Object.keys(data).length;
-      for (x = 0; x < logMessages; x++) {
-        document.getElementById("SI1").innerHTML += data[x];
-        document.getElementById("SI1").innerHTML += "<br>";
-
-        if (data[x].substring(0, 7) == "SUCCESS") {
-          increment = lastPictureIndex + x - 1;
-          //create picture box
-          newPictureBox = document.createElement("div");
-          newPictureBox.setAttribute("id", "pictures/" + increment);
-
-          newPictureBox.setAttribute("class", "pictureBox");
-          newPictureBox.setAttribute("onClick", "imgClick(" + increment + ")");
-          newPicture = document.createElement("img");
-          newPicture.setAttribute("id", increment);
-          newPicture.setAttribute("class", "photo");
-          newPicture.setAttribute(
-            "alt",
-            $("select[name=scrapeDestination]").val()
-          );
-          newPicture.setAttribute(
-            "src",
-            data[x].substring(
-              data[x].indexOf("as /static/") + 4,
-              data[x].length + 1
-            )
-          );
-          newPicture.setAttribute("style", "opacity: 1");
-
-          //create check mark division
-          checkMarkDiv = document.createElement("div");
-          checkMarkDiv.setAttribute("class", "overlay");
-          checkMarkDiv.setAttribute("id", "c" + increment);
-          checkMarkDiv.setAttribute("style", "opacity: 0");
-          checkMarkDiv.innerHTML = "<h1>" + increment + "</h1>";
-          //create checkmark image
-          checkMarkImage = document.createElement("img");
-          checkMarkImage.setAttribute("class", "checkMark");
-          checkMarkImage.setAttribute("src", "/static/checkmark.png");
-          //append check mark to picture to checkmark division, append checkmark division to picturebox, append picture to picturebox, append picturebox as
-          pictureContainer.appendChild(newPictureBox);
-          newPictureBox.appendChild(newPicture);
-          newPictureBox.appendChild(checkMarkDiv);
-          // checkMarkDiv.appendChild(document.createElement("div"));
-          checkMarkDiv.appendChild(checkMarkImage);
-
-          console.log($("select[name=scrapeDestination]").val());
-          folderSelect($("select[name=scrapeDestination]").val());
-          //rerun show photo function
-        }
-      }
-    }),
-    (scrapeLog = setInterval(function scrapePictureLog(data) {
-      $.ajax({
-        type: "POST", // define the type of HTTP verb we want to use (POST for our form)
-        contentType: "application/json",
-        url: "_scrape_Request", // the url where we want to POST
-        data: JSON.stringify(formDataStatus), // our data object
-        dataType: "json", // what type of data do we expect back from the server
-        encode: true,
-        success: function (data) {
-          // console.log(data);
-          document.getElementById("SI1").innerHTML = "";
-          for (let i = 0; i < Object.keys(data).length; i++) {
-            // console.log("updating status");
-            document.getElementById("SI1").innerHTML += data[i];
-            document.getElementById("SI1").innerHTML += "<br>";
-          }
-          console.log("still on: " + scrapeProgress);
-          if (scrapeProgress != 1) {
-            console.log("turning off");
-            clearInterval(scrapeLog);
-          }
-        },
-      });
-    }, 1000));
-
-  // stop the form from submitting the normal way and refreshing the page
-  event.preventDefault();
-});
+//remove scrape modal from DOM upon close
+function removeNewScrapeModal(modalReference) {
+  removeElem = document.getElementById(modalReference);
+  removeElem.parentNode.removeChild(removeElem);
+}
 
 //show/hide pictures based upon folder selection.
 function folderSelect(folder) {
-  console.log("show folder: " + folder);
+  // console.log("show folder: " + folder);
   var allPics = document.getElementsByClassName("pictureBox");
   for (i = 0; i < allPics.length; i++) {
     if (
@@ -477,7 +364,7 @@ function folderSelect(folder) {
     ) {
       allPics[i].style.display = "block";
     } else {
-      console.log(allPics[i].alt);
+      // console.log(allPics[i].alt);
       allPics[i].style.display = "none";
     }
   }
@@ -536,4 +423,246 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("orientationChange", lazyload);
   }
 });
-//comment
+
+function googleImageScrape(x) {
+  new ScrapeRequest(x).runScrapeRequest();
+}
+
+//finds the last class child of pictureContainer
+function last_of_class(elt, cls) {
+  var children = elt.getElementsByClassName(cls);
+  return children[children.length - 1];
+}
+
+class ScrapeRequest {
+  constructor(scrapeID) {
+    this.scrapeModelID = scrapeID;
+    this.scrapeProgress = 1;
+    this.scrapeModel;
+    this.scrapeLog;
+    this.lastPicture;
+    this.lastPictureIndex;
+    this.modelLog;
+    this.newPicture;
+    this.newPictureBox;
+    this.checkMarkDiv;
+    this.checkMarkImage;
+    this.docPictureContainer;
+    this.requestDateTime;
+    this.formDataStatus;
+    this.formData;
+    this.increment;
+
+    this.checkStats = setInterval(this.scrapePictureLog.bind(this), 1000);
+  }
+
+  scrapeStatusCheck(data) {
+    console.log("scrapeProgress on Success: ");
+    console.log(data);
+    if (this.scrapeProgress == 1) {
+      //modelLog = scrapeModelID.querySelector('div[name="progressLog"]');
+      console.log("scrapeProgress is 1");
+      this.modelLog = document.getElementById(this.scrapeModelID + "Log");
+      this.modelLog.innerHTML = "";
+      for (let i = 0; i < Object.keys(data).length; i++) {
+        // console.log("updating status");
+        this.modelLog.innerHTML += data[i];
+        this.modelLog.innerHTML += "<br>";
+      }
+      console.log("still on: " + this.scrapeProgress);
+    }
+    if (this.scrapeProgress != 1) {
+      console.log("turning off");
+      clearInterval(this.checkStats);
+    }
+  }
+
+  scrapePictureLog = () => {
+    console.log(this.formDataStatus);
+    console.log(this.setState);
+    $.ajax({
+      type: "POST", // define the type of HTTP verb we want to use (POST for our form)
+      contentType: "application/json",
+      url: "_scrape_Request", // the url where we want to POST
+      data: JSON.stringify(this.formDataStatus), // our data object
+      dataType: "json", // what type of data do we expect back from the server
+      encode: true,
+      success: (data) => this.scrapeStatusCheck(data),
+    });
+  };
+
+  runScrapeRequest() {
+    this.scrapeModel = document.getElementById(this.scrapeModelID);
+    this.requestDateTime = new Date().getTime();
+    this.formData = {
+      imageDescription: this.scrapeModel.querySelector(
+        'input[name="imageDescription"]'
+      ).value,
+      imageCount: this.scrapeModel.querySelector('input[name="imageCount"]')
+        .value,
+      scrapeDestination: this.scrapeModel.querySelector(
+        'select[name="scrapeDestination"]'
+      ).value,
+      requestName:
+        this.scrapeModel.querySelector('input[name="imageDescription"]').value +
+        this.requestDateTime,
+      postType: "Scrape",
+    };
+
+    this.formDataStatus = {
+      imageDescription: this.scrapeModel.querySelector(
+        'input[name="imageDescription"]'
+      ).value,
+      imageCount: this.scrapeModel.querySelector('input[name="imageCount"]')
+        .value,
+      scrapeDestination: this.scrapeModel.querySelector(
+        'select[name="scrapeDestination"]'
+      ).value,
+      requestName:
+        this.scrapeModel.querySelector('input[name="imageDescription"]').value +
+        this.requestDateTime,
+      postType: "Log",
+    };
+    //this is also a function so i need to acces the correct THIS for this to work right. It must be affecting the promise as well.
+    // var that = this;
+    $.ajax({
+      type: "POST", // define the type of HTTP verb we want to use (POST for our form)
+      contentType: "application/json",
+      url: "_scrape_Request", // the url where we want to POST
+      data: JSON.stringify(this.formData), // our data object
+      dataType: "json", // what type of data do we expect back from the server
+      encode: true,
+      success: (data) => {
+        // find last picture box in pictureFram  and insert the following below.
+        // console.log(data);
+        this.scrapeProgress = 0;
+        // console.log(this.scrapeProgress);
+        this.lastPicture = last_of_class(pictureContainer, "pictureBox");
+        //if picture is successfully downloaded update picture frame.
+        this.lastPictureIndex = parseInt(
+          this.lastPicture.id.substring(
+            this.lastPicture.id.lastIndexOf("/") + 1,
+            this.lastPicture.id.length + 1
+          )
+        );
+        // console.log(
+        //   "Container Break: lastpicture then lastPictureIndex",
+        //   lastPicture,
+        //   lastPictureIndex
+        // );
+        this.modelLog = document.getElementById(this.scrapeModelID + "Log");
+        // console.log(this.modelLog);
+        this.modelLog.innerHTML += "Complete!";
+        // console.log("update picture frame next");
+        this.logMessages = Object.keys(data).length;
+        for (var x = 0; x < this.logMessages; x++) {
+          // console.log("testing string: " + data[x]);
+          if (data[x].substring(0, 7) == "SUCCESS") {
+            this.increment = this.lastPictureIndex + x - 1;
+            // console.log("newPicture success");
+            this.newPictureBox = document.createElement("div");
+            this.newPictureBox.setAttribute("id", "pictures/" + this.increment);
+
+            this.newPictureBox.setAttribute("class", "pictureBox");
+            this.newPictureBox.setAttribute(
+              "onClick",
+              "imgClick(" + this.increment + ")"
+            );
+            // console.log("New Picture Box:");
+            // console.log(this.newPictureBox);
+            this.newPicture = document.createElement("img");
+            this.newPicture.setAttribute("id", this.increment);
+            this.newPicture.setAttribute("class", "photo");
+            this.newPicture.setAttribute(
+              "alt",
+              $("select[name=scrapeDestination]").val()
+            );
+            this.newPicture.setAttribute(
+              "src",
+              data[x].substring(
+                data[x].indexOf("as /static/") + 4,
+                data[x].length + 1
+              )
+            );
+            this.newPicture.setAttribute("style", "opacity: 1");
+
+            //create check mark division
+            this.checkMarkDiv = document.createElement("div");
+            this.checkMarkDiv.setAttribute("class", "overlay");
+            this.checkMarkDiv.setAttribute("id", "c" + this.increment);
+            this.checkMarkDiv.setAttribute("style", "opacity: 0");
+            this.checkMarkDiv.innerHTML = "<h1>" + this.increment + "</h1>";
+            //create checkmark image
+            this.checkMarkImage = document.createElement("img");
+            this.checkMarkImage.setAttribute("class", "checkMark");
+            this.checkMarkImage.setAttribute("src", "/static/checkmark.png");
+            //append check mark to picture to checkmark division, append checkmark division to picturebox, append picture to picturebox, append picturebox as
+            this.docPictureContainer = document.getElementById(
+              "pictureContainer"
+            );
+            this.docPictureContainer.appendChild(this.newPictureBox);
+            this.newPictureBox.appendChild(this.newPicture);
+            this.newPictureBox.appendChild(this.checkMarkDiv);
+            // checkMarkDiv.appendChild(document.createElement("div"));
+            this.checkMarkDiv.appendChild(this.checkMarkImage);
+            // console.log(this.checkMarkDiv);
+            // console.log("Done");
+            // console.log($("select[name=scrapeDestination]").val());
+            folderSelect($("select[name=scrapeDestination]").val());
+            //rerun show photo function
+          }
+        }
+      },
+    }),
+      //.done($.proxy(this.completeScrapeRequest({ 0: "data" }), that)),
+      this.scrapePictureLog();
+  }
+}
+
+function dragElement(elmnt) {
+  console.log("starting drag");
+  console.log(elmnt);
+  var pos1 = 0,
+    pos2 = 0,
+    pos3 = 0,
+    pos4 = 0;
+  if (document.getElementById(elmnt.id + "button")) {
+    console.log("found button");
+    // if present, the button is where you move the DIV from:
+    document.getElementById(elmnt.id + "button").onmousedown = dragMouseDown;
+  } else {
+    console.log("could not find button");
+    // otherwise, move the DIV from anywhere inside the DIV:
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = elmnt.offsetTop - pos2 + "px";
+    elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}

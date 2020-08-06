@@ -1,8 +1,27 @@
+body {
+  overflow: auto;
+}
+
+body.model-open {
+  overflow: auto;
+}
+
 div.main {
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 2;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: row;
+}
+
+.rightButton {
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
 }
 
 div.navbar navbar-inverse sticky-top {
@@ -263,4 +282,39 @@ h1 {
 
 .dropdown-content a:hover {
   background-color: #818181;
+}
+
+.modal {
+  position: absolue;
+  z-index: 10;
+  height: 400px;
+  width: 600px;
+}
+
+.modal.in {
+  position: absolue;
+  z-index: 10;
+  height: 400px;
+  width: 600px;
+}
+
+.modal-dialog {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  padding: 10px;
+}
+
+.modal.fixed {
+  position: absolute;
+}
+
+.modalHook {
+  height: 0px;
+  width: 0px;
+}
+
+modal.in {
+  height: 300px;
+  width: 300px;
 }

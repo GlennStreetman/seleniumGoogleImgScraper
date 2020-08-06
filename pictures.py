@@ -225,6 +225,8 @@ class GoogleScrapeRequestClass:
         return self.newScrape
 
     def getRequest(self):
+        print("Returning Partial:")
+        print(self.picture_log)
         return self.picture_log
 
 

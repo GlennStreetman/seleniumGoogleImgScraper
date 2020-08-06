@@ -24,8 +24,19 @@
 
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript"> 
+      let appDirs = { 
+        {% for dir in dirs %}
+          {{ dir[0] }} : 
+          '{{ dir[1] }}',
+        {% endfor %}
+      }   
+    </script>  
+
   </head>
-  <body>
+  <body class="model-open">
+    <div id="modalBox" class="modalBox"></div>
     <div class="main">
       <nav class="navbar navbar-inverse sticky-top">
         <div class="container-fluid">
@@ -57,7 +68,7 @@
               </button>
             </li>
             <li>
-              <button id="scrapeGoogle" class="topBar" onclick="showModal('scrapeImageModal')">
+              <button id="scrapeGoogle" class="topBar" onclick="newScrapeModal()">
                 Search for Images
                 <!-- create a newFolder function that uses ajax. -->
               </button>
@@ -86,6 +97,7 @@
         data-toggle="modal"
         data-target=""
         style="display: none;"
+        data-backdrop="false"
       >
     <!-- #myModal -->
       </button>
@@ -221,59 +233,7 @@
         </div>
       </div>
 
-           <!-- Scrape images from Google modal. -->
-           <div id="scrapeImageModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-              <!-- Modal content-->
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal">
-                    <!-- &times; -->
-                  </button>
-                  <form id="scrapeImage" name="scrapeImage">
-                    <label for="imageDescription">Image Description</label>
-                      <input
-                        type="text"
-                        name="imageDescription"
-                        id="imageDescription"
-                        value=""
-                        required
-                      /><br />
-
-                      <label for="imageCount">Number of Images</label>
-                      <input
-                        type="number"
-                        name="imageCount"
-                        id="imageCount"
-                        value="10"
-                        required
-                      /><br />
-                    
-                    <label for="scrapeDestination">Save picutres to:</label>
-                    <select id="scrapeDestination" name="scrapeDestination" selected="">
-                      {% for dir in dirs %}
-                      <option value="{{ dir[1] }}">{{ dir[1] }}</option>
-                      {% endfor %}
-                    </select>
-                    <br /><input type="submit" value="Scrape Images" />
-                  </form>
-                  <!-- <p id="modalFilePath">Some text in the modal.</p> -->
-                </div> 
-                <div id = "SI1" class="modal-body">
-                  Scrape specified number of images from Google image search.
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn btn-default"
-                    data-dismiss="modal"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div id="modalHook"></div>
 
       <div class="pictureContainer" id="pictureContainer">
         <!-- [0]#, [1]FileName, [2]filepath -->
@@ -317,4 +277,65 @@
     src="{{ url_for('static', filename='picture.js') }}"
   ></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+{# set variable = ($('#createScrapeModal').html()) to reference #}
+{# @@text indictates locations to be updated by javascript before rendering HTML. See newScrapeModal function. #}
+<script id="createScrapeModal" type="text/template">
+          <div id="scrapeImageModal@@id" class="modal" role="dialog">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                  
+                  <div id ="scrapeImageModal@@idheader" class="modal-header">
+                    <div class="header-content">
+                      <form id="scrapeImage@@id" name="scrapeImage">
+                        <label for="imageDescription">Image Description</label>
+                          <input
+                            type="text"
+                            name="imageDescription"
+                            id="imageDescription@@id"
+                            value=""
+                            required
+                          />
+                        <br />
+                        <label for="imageCount">Number of Images</label>
+                        <input
+                          type="number"
+                          name="imageCount"
+                          id="imageCount@@id"
+                          value="10"
+                          required
+                        /><br />
+                      
+                      <label for="scrapeDestination">Save picutres to:</label>
+                      <select id="scrapeDestination@@id" name="scrapeDestination" selected="">
+                      </select>
+                      <br /><input type="button" value="ScrapeImages" onclick=googleImageScrape('scrapeImageModal@@id') />
+                      </form>
+                    <div class="rightButton" align="right"> 
+                    <button id="scrapeImageModal@@idbutton"  onmouseover="dragElement(scrapeImageModal@@id)"><i class="fa fa-arrows" aria-hidden="true"></i></button> 
+                    </div>
+                  </div>
+                  
+                </div> 
+
+
+                <div id = "scrapeImageModal@@idLog" class="modal-body" name="progressLog">
+                  Scrape specified number of images from Google image search.
+                </div>
+                <div class="modal-footer">
+                  <button onclick = "removeNewScrapeModal('scrapeImageModal@@id')">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+  </script>
+
 </html>
+
+
+                  {# <button type="button" class="close" data-dismiss="modal">
+                  </button> #}
