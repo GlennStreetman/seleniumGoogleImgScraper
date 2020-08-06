@@ -1,6 +1,7 @@
 let clickedImageList = {};
 let staticPath = "E:/Flask/pictureApp/pictureApp/static/pictures/";
 let visableFolder = "pictures/";
+
 folderSelect(visableFolder);
 //finds image name
 function getFileName(indexRef) {
@@ -118,9 +119,8 @@ function addFolderDropdown(folderPath) {
   document
     .getElementById("bulkDestinationPath")
     .options.add(updateDropdownWith());
-  document
-    .getElementById("scrapeDestination")
-    .options.add(updateDropdownWith());
+  document.getElementById("modalFilePath").options.add(updateDropdownWith());
+  appDirs[folderPath] = folderPath;
   document.getElementById("topBarFolderList").innerHTML +=
     "<a href='#' onclick=folderSelect('" +
     folderPath +
