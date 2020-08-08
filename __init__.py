@@ -24,10 +24,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # from flaskr import db
-
-    # db.init_app(app)
-
     from pictureApp import pictures
     app.register_blueprint(pictures.bp)
     app.add_url_rule("/", endpoint="pictures")

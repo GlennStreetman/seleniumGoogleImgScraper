@@ -6,13 +6,20 @@ import io
 import hashlib
 from PIL import Image
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pictures', img_count=5, picture_log={}):
 
+    chrome_options = Options()
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+
     picture_log
-    DRIVER_PATH = "./chromedriver.exe"
-    wd = webdriver.Chrome(executable_path=DRIVER_PATH)
+    DRIVER_PATH = "./chromedriver"
+    wd = webdriver.Chrome(executable_path=DRIVER_PATH,
+                          chrome_options=chrome_options)
 
     def fetch_image_urls(query: str, max_links_to_fetch: int, wd: webdriver, sleep_between_interactions: int = 1):
         def scroll_to_end(wd):

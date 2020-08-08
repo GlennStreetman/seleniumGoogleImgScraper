@@ -9,11 +9,6 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-# from flaskr.auth import login_required
-# from flaskr.db import get_db
-# from flaskr.templates.yardi.yardiSQL import ppoAttribute
-# from flaskr.templates.yardi.yardiSQL import ppoReport
-# from flaskr import getb_bp_urls
 from flask import jsonify
 
 import glob
