@@ -192,7 +192,7 @@ class GoogleScrapeRequestClass:
         self.runLog = {0: "spinning up scrape request"}
         self.searchTerm = searchTerm
         self.scrapeCount = scrapeCount
-        self.saveTo = "E:/Flask/pictureApp/pictureApp/static/" + saveTo
+        self.saveTo = workPath + "/pictureApp/static/" + saveTo
         self.scrapeRequestName = scrapeRequestName
         self.picture_log = {0: "Spinning up scrape request"}
 
