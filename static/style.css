@@ -7,10 +7,19 @@ body.model-open {
 }
 
 div.main {
-  position: sticky;
   top: 0;
   width: 100%;
+  z-index: 99;
+  position: sticky;
+}
+
+div.sideBarOpen {
   z-index: 2;
+  font-size: 45px;
+  position: fixed;
+  left: 5%;
+  top: 10%;
+  display: none;
 }
 
 .header-content {
@@ -41,7 +50,7 @@ div.nav {
   /* height: 100%;  */
   width: 0; /* 0 width - change this with JavaScript */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Stay on top */
+  z-index: 3; /* Stay on top */
   /* top: 0; */
   left: 0;
   background-color: #222; /* Black*/
@@ -250,6 +259,7 @@ h1 {
   position: relative;
   display: inline-block;
   background-color: #222;
+  z-index: 5;
 }
 
 .dropdown-content {
@@ -258,7 +268,7 @@ h1 {
   background-color: #333;
   min-width: 160px;
   box-shadow: #222;
-  z-index: 1;
+  z-index: 5;
 }
 
 .dropdown-content a {
@@ -285,17 +295,30 @@ h1 {
 }
 
 .modal {
-  position: absolue;
+  position: fixed;
   z-index: 10;
-  height: 400px;
+  height: 600px;
   width: 600px;
+  top: 20%;
+  left: 20%;
+}
+
+.modal.fade.in {
+  position: fixed;
+  z-index: 10;
+  height: 600px;
+  width: 600px;
+  top: 20%;
+  left: 20%;
 }
 
 .modal.in {
   position: absolue;
   z-index: 10;
-  height: 400px;
+  height: 600px;
   width: 600px;
+  top: 20%;
+  left: 20%;
 }
 
 .modal-dialog {
@@ -314,7 +337,16 @@ h1 {
   width: 0px;
 }
 
-modal.in {
-  height: 300px;
-  width: 300px;
+.modal-body {
+  height: 250px;
+  overflow-y: auto;
+}
+
+.fa.fa-bars:hover {
+  text-shadow: 0 0 3px;
+  color: red;
+}
+
+div.pictureBox:hover {
+  filter: grayscale(95%);
 }

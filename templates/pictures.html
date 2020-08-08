@@ -3,6 +3,7 @@
   <head sticky-top>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -99,10 +100,15 @@
         style="display: none;"
         data-backdrop="false"
       >
-    <!-- #myModal -->
       </button>
 
-      <!-- Modal Rename/Move picture  -->
+
+
+      
+      <div id="sideBarOpen" class="sideBarOpen"> <i class="fa fa-bars" aria-hidden="true" onclick="openNav()"></i>  </div>
+      <div id="modalHook" class="modalHook">
+      
+            <!-- Modal Rename/Move picture  -->
       <div id="renamePictureModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
           <!-- Modal content-->
@@ -232,10 +238,12 @@
           </div>
         </div>
       </div>
-
-      <div id="modalHook"></div>
+      
+      
+      </div>
 
       <div class="pictureContainer" id="pictureContainer">
+      
         <!-- [0]#, [1]FileName, [2]filepath -->
         {% for pic in pics %}
         <div
@@ -314,7 +322,8 @@
                       <br /><input type="button" value="ScrapeImages" onclick=googleImageScrape('scrapeImageModal@@id') />
                       </form>
                     <div class="rightButton" align="right"> 
-                    <button id="scrapeImageModal@@idbutton"  onmouseover="dragElement(scrapeImageModal@@id)"><i class="fa fa-arrows" aria-hidden="true"></i></button> 
+                    <button id="scrapeImageModal@@plusOne" style="height:25%"  onclick="newScrapeModal()"><i class="fa fa-plus-square-o" aria-hidden="true"></i></button>
+                    <button id="scrapeImageModal@@idbutton" style="height:25%" onmouseover="dragElement(scrapeImageModal@@id)"><i class="fa fa-arrows" aria-hidden="true"></i></button> 
                     </div>
                   </div>
                   

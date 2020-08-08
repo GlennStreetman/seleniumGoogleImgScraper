@@ -17,6 +17,7 @@ from flaskr import getb_bp_urls
 from flask import jsonify
 
 import glob
+import os
 from os import path
 from os import mkdir
 import shutil
@@ -26,17 +27,17 @@ from .imageScrapeGoogle import scrape_Google_Images
 from .imageScrapeGoogle import logStatus
 
 bp = Blueprint("pictures", __name__)
+workPath = os.path.abspath(os.getcwd())
 
 
 def find_unsorted_pics() -> list:  # returns list of jpegs
     unsorted_pics = glob.glob(
-        "E:/Flask/pictureApp/pictureApp/static/pictures/**", recursive=True)
+        workPath + "/pictureApp/static/pictures/**", recursive=True)
     unsorted_pic_list = []
     for i in range(len(unsorted_pics)):
-        # for i in range(64):
         if unsorted_pics[i][-4:] == ".jpg":
             correctedFileName = unsorted_pics[i].replace(
-                "E:/Flask/pictureApp/pictureApp/", "")
+                workPath + "/pictureApp/", "")
             correctedFileName = correctedFileName.replace("\\", "/")
             filepath = correctedFileName.replace(
                 "static/", "")[0:correctedFileName.replace("static/", "").rfind("/")+1]
@@ -44,23 +45,24 @@ def find_unsorted_pics() -> list:  # returns list of jpegs
     return unsorted_pic_list
 
 
-def find_directory() -> list:  # returns list of jpegs
+def find_directory() -> list:  # returns list of valid file paths
     unsorted_pics = glob.glob(
-        "E:/Flask/pictureApp/pictureApp/static/pictures/**", recursive=True)
+        workPath + "/pictureApp/static/pictures/**", recursive=True)
     directory_list = []
     for i in range(len(unsorted_pics)):
         if unsorted_pics[i].find(".") == -1:
             correcteddDirectory = unsorted_pics[i].replace(
-                "E:/Flask/pictureApp/pictureApp/static/", "")
+                workPath + "/pictureApp/static/", "")
             correcteddDirectory = correcteddDirectory.replace("\\", "/")
             correcteddDirectory += "/" if correcteddDirectory[-1] != "/" else ""
             directory_list.append([i, correcteddDirectory])
-
+    print(directory_list)
     return directory_list
 
 
 # validate destination directory is in find_directory list
 def validate_directory(testDir: str) -> bool:
+    print(testDir)
     for dir in find_directory():
         if dir[1] == testDir:
             return True
@@ -68,9 +70,7 @@ def validate_directory(testDir: str) -> bool:
 
 
 def validate_source_photo(testPhoto: str) -> bool:
-    # print("test photo validation: " + testPhoto)
     for photo in find_unsorted_pics():
-        # print(photo[1])
         if testPhoto == photo[1].replace("static/", ""):
             return True
     return False
@@ -89,23 +89,18 @@ def update_picture(flag=0, picName=0, picFolder=0):
         newPhotoPath = picFolder
         imgSource = picName.replace(
             "http://127.0.0.1:5000/static/", "")
-        basePath = "E:/Flask/pictureApp/pictureApp/static/"
+        basePath = workPath + "/pictureApp/static/"
 
     elif request.method == "POST":
-        # print(request.is_json) #content = request.get_json() # print(content)
         jsonData = request.get_json()
         newPhotoName = jsonData['newPhotoName']
         newPhotoPath = jsonData['newPhotoSource']
         imgSource = jsonData['imgSource'].replace(
             "http://127.0.0.1:5000/static/", "")
-        basePath = "E:/Flask/pictureApp/pictureApp/static/"
-        # print(newPhotoName)
-        # print(newPhotoPath)
-        # print(imgSource)
-        # begin validation
+        basePath = workPath + "/pictureApp/static/"
+
     if validate_source_photo(imgSource) == False:
         # check that the source picture is in the source picture list.
-        # print("_update_picture: Failed destination validate_source_photo")
         if flag == 0:
             return jsonify(error="Invalid Source Photo")
         else:
@@ -113,7 +108,6 @@ def update_picture(flag=0, picName=0, picFolder=0):
 
     if validate_directory(newPhotoPath) == False:
         # check that the destination path is valid
-        # print("_update_picture: failed destination validate_directory")
         if flag == 0:
             return jsonify(error="Invalid Destination path")
         else:
@@ -121,7 +115,6 @@ def update_picture(flag=0, picName=0, picFolder=0):
 
     if newPhotoName.isalnum() != True:
         # check that a alphanumeric filename is given.
-        # print("_update_picture: failed newPhotoName")
         if flag == 0:
             return jsonify(error="Please Provide an alpha-numeric photo name")
         # else:
@@ -129,7 +122,6 @@ def update_picture(flag=0, picName=0, picFolder=0):
 
     if path.exists(basePath + newPhotoPath + newPhotoName) == True:
         # check to see if the filename + path does not already exist.
-        # print("_update_picture: failed, picture already exists")
         if flag == 0:
             return jsonify(error="Duplicate file name already exists.")
         else:
@@ -137,11 +129,8 @@ def update_picture(flag=0, picName=0, picFolder=0):
 
     moveFile = shutil.move(
         basePath + imgSource, basePath + newPhotoPath + "/" + newPhotoName + ".jpg")
-    moveFile
-    # print(moveFile)  # return new files, path, popup with result of move
 
     # update picture name and location in website and sidebar.
-    # print("picture renamed/moved!")
     if flag == 0:
         return jsonify(error="none", success="File Renamed: " + newPhotoName + " and saved in folder: " + newPhotoPath)
     else:
@@ -152,28 +141,21 @@ def update_picture(flag=0, picName=0, picFolder=0):
 def newFolder():
 
     if request.method == "POST":
-        # print(request.is_json) #content = request.get_json() # print(content)
         jsonData = request.get_json()
         newFolder = jsonData['newFolder']
         newFolderPath = jsonData['newFolderPath']
-        basePath = "E:/Flask/pictureApp/pictureApp/static/"
-
-        # print(newFolder)
-        # print(newFolderPath)
+        basePath = workPath + "/pictureApp/static/"
 
         if path.exists(basePath + newFolderPath + newFolder) == True:
             # check to see if the filename + path does not already exist.
-            # print("_new_folder: failed, folder directory already exists")
             return jsonify(error="Duplicate file path already exists.")
 
         if validate_directory(newFolderPath) == False:
             # check the the file path specified exists
-            # print("_new_folder: failed destination validate_directory")
             return jsonify(error="Invalid folder path")
 
         if newFolder.isalnum() != True:
             # check that the folder name is valid (limit alpha/numeric)
-            # print("_update_picture: failed newPhotoName")
             return jsonify(error="Please Provide an alpha-numeric photo name")
 
         mkdir(basePath + newFolderPath + newFolder)
@@ -248,37 +230,3 @@ def scrape_Picture_Request():
             return globals()[newRequestName].postRequest()
         else:
             return globals()[newRequestName].getRequest()
-
-
-# @ bp.route('/_scrape_Request_Status', methods=("GET", "POST"))
-# def scrape_Picture_Request_Status():
-
-#     if request.method == "POST":
-#         jsonData = request.get_json()
-#         scrapeRequestName = jsonData['requestName']
-#         print("GET:" + scrapeRequestName)
-#         return locals()[scrapeRequestName].getRequest()
-
-# ---------------------------------------------------------------------------------
-
-
-# @ bp.route('/_scrape_Request', methods=("GET", "POST"))
-# def scrape_Picture_Request():
-
-#     global runLog
-
-#     if request.method == "POST":
-
-#         jsonData = request.get_json()
-#         runLog = {0: "spinning up scrape request"}  # this doesnt do anything
-#         searchTerm = jsonData['imageDescription']
-#         scrapeCount = int(jsonData['imageCount'])
-#         staticPath = "E:/Flask/pictureApp/pictureApp/static/"
-#         saveTo = staticPath + jsonData['scrapeDestination']
-
-#         scrapeRequest = scrape_Google_Images(searchTerm, saveTo, scrapeCount)
-#         runLog = scrapeRequest
-#         return scrapeRequest
-
-#     if request.method == "GET":
-#         return jsonify(logStatus())

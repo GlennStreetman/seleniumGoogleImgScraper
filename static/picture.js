@@ -1,5 +1,4 @@
 let clickedImageList = {};
-let staticPath = "E:/Flask/pictureApp/pictureApp/static/pictures/";
 let visableFolder = "pictures/";
 
 folderSelect(visableFolder);
@@ -45,9 +44,11 @@ function imgClick(myArg) {
 //toggle sidebar
 function hideToggle() {
   if (Object.keys(clickedImageList).length == 0) {
-    document.getElementById("toggleButton").style.display = "none";
+    // document.getElementById("toggleButton").style.display = "none";
+    document.getElementById("sideBarOpen").style.display = "none";
   } else {
-    document.getElementById("toggleButton").style.display = "block";
+    // document.getElementById("toggleButton").style.display = "block";
+    document.getElementById("sideBarOpen").style.display = "block";
   }
 }
 //adjust sidebar padding when sidebar toggled.
@@ -58,6 +59,7 @@ function openNav() {
     "20%";
   document.getElementsByClassName("pictureContainer")[0].style.paddingRight =
     "0%";
+  document.getElementById("sideBarOpen").style.display = "none";
 }
 
 //update sidebar with list of selected pictures.
@@ -100,6 +102,7 @@ function resetNav() {
       imgClick(img);
     }
   }
+  document.getElementById("sideBarOpen").style.display = "none";
   updateNav();
   closeNav();
 }
@@ -248,8 +251,6 @@ $("#filePathModal").submit(function (event) {
         //document.getElementById("filePathModal").click();
         addFolderDropdown(updateDropdown);
       }
-
-      // here we will handle errors and validation messages
     });
 
   // stop the form from submitting the normal way and refreshing the page

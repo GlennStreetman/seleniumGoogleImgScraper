@@ -11,7 +11,7 @@ from selenium import webdriver
 def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pictures', img_count=5, picture_log={}):
 
     picture_log
-    DRIVER_PATH = "E:/Flask/pictureApp/chromedriver.exe"
+    DRIVER_PATH = "./chromedriver.exe"
     wd = webdriver.Chrome(executable_path=DRIVER_PATH)
 
     def fetch_image_urls(query: str, max_links_to_fetch: int, wd: webdriver, sleep_between_interactions: int = 1):
