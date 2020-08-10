@@ -22,7 +22,9 @@ from .imageScrapeGoogle import scrape_Google_Images
 from .imageScrapeGoogle import logStatus
 
 bp = Blueprint("pictures", __name__)
-workPath = os.path.abspath(os.getcwd())
+
+here = os.path.dirname(__file__)
+workPath = os.path.dirname(here)
 
 
 def find_unsorted_pics() -> list:  # returns list of jpegs

@@ -8,8 +8,11 @@ from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+here = os.path.dirname(__file__)
+workPath = os.path.dirname(here)
 
-def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pictures', img_count=5, picture_log={}):
+
+def scrape_Google_Images(search_term: str, target_path=workPath + '/pictureApp/static/pictures', img_count=5, picture_log={}):
 
     chrome_options = Options()
     chrome_options.add_argument('--no-sandbox')
@@ -112,7 +115,7 @@ def scrape_Google_Images(search_term: str, target_path='./pictureApp/static/pict
             picture_log[len(picture_log)
                         ] = f"ERROR - Could not save {url} - {e}"
 
-    def search_and_download(search_term: str, driver_path: str, target_path='./pictureApp/static/pictures', number_images=5):
+    def search_and_download(search_term: str, driver_path: str, target_path=workPath + '/pictureApp/static/pictures', number_images=5):
         target_folder = target_path
         # target_folder = os.path.join(
         #     target_path, '_'.join(search_term.lower().split(' ')))
