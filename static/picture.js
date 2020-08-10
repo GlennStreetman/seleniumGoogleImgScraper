@@ -110,8 +110,8 @@ function resetNav() {
 function addFolderDropdown(folderPath) {
   function updateDropdownWith() {
     var opt = document.createElement("option");
-    opt.text = folderPath;
-    opt.value = folderPath;
+    opt.text = folderPath + "/";
+    opt.value = folderPath + "/";
     return opt;
   }
 
@@ -127,8 +127,10 @@ function addFolderDropdown(folderPath) {
   document.getElementById("topBarFolderList").innerHTML +=
     "<a href='#' onclick=folderSelect('" +
     folderPath +
+    "/" +
     "');>" +
     folderPath +
+    "/" +
     "</a>";
 }
 
