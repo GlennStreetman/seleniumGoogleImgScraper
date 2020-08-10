@@ -20,7 +20,7 @@ def scrape_Google_Images(search_term: str, target_path=workPath + '/pictureApp/s
     chrome_options.add_argument('--disable-dev-shm-usage')
 
     picture_log
-    DRIVER_PATH = "./chromedriver"
+    DRIVER_PATH = workPath + "/chromedriver"
     wd = webdriver.Chrome(executable_path=DRIVER_PATH,
                           chrome_options=chrome_options)
 
