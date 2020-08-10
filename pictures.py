@@ -82,16 +82,15 @@ def update_picture(flag=0, picName=0, picFolder=0):
     if flag == 1:
         newPhotoName = picName[picName.rfind("/")+1: picName.rfind(".")]
         newPhotoPath = picFolder
-        imgSource = picName.replace(
-            "http://127.0.0.1:5000/static/", "")
+        imgSource = picName[picName.find("static/") + 7:]  # string slicer
         basePath = workPath + "/pictureApp/static/"
 
     elif request.method == "POST":
         jsonData = request.get_json()
         newPhotoName = jsonData['newPhotoName']
         newPhotoPath = jsonData['newPhotoSource']
-        imgSource = jsonData['imgSource'].replace(
-            "http://127.0.0.1:5000/static/", "")
+        imgSource = jsonData['imgSource']
+        imgSource = imgSource[imgSource.find('static/') + 7:]  # string slicer
         basePath = workPath + "/pictureApp/static/"
 
     if validate_source_photo(imgSource) == False:
